@@ -25,6 +25,7 @@ if status is-interactive
     alias gcm='git commit -m'
     alias gca='git commit --amend'
     alias gl='git lg'
+    alias gp='git push'
     # alias gsr='find . -type d -name ".git" | while read dir ; do sh -c "cd $dir/../ && git status -s | grep -q [azAZ09] && echo ---- ${dir//\.git/} ---- && git status -s" ; done'
 
     # Kubernetes aliases
@@ -57,6 +58,8 @@ if status is-interactive
     
     # fdfind
     alias fd="fdfind"
+
+    alias ls="exa --icons --group-directories-first"
 
     function k --description 'List contents of directory, like ls but better'
         zsh -c ". $HOME/k/k.sh; k $argv"
