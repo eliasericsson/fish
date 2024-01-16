@@ -10,7 +10,7 @@ if status is-interactive
     set DOTNET_ROOT $HOME/dotnet
     set EDITOR nvim
     set -g fish_greeting ""
-    # set DISPLAY $(echo $(grep nameserver /etc/resolv.conf | awk '{print $2}'):0)
+    set DISPLAY $(echo $(grep nameserver /etc/resolv.conf | awk '{print $2}'):0)
 
     # Vim shorthands to avoid using plain Vim
     alias vim="nvim"
@@ -65,7 +65,28 @@ if status is-interactive
         zsh -c ". $HOME/k/k.sh; k $argv"
     end
 
+    function outs --description 'Takes AWS CDK outputs and promotes them to environment variables'
+        if test -e outputs.json
+            # Get the outputs from the JSON file with JQ and store them in a variable
+            set outputs $(cat outputs.json | jq -r 'to_entries[] | [.key, (.value | to_entries[] | .key, .value)] | @tsv')
+            # jq -r '[to_entries[] | [.key, (.value | to_entries[] | .key, .value)] | {(.[0:2] | join(".")): .[2]}]' outputs.json
+        else
+            echo "No outputs.json file found here"
+        end
+        
+        for output in $outputs
+            # Split the output into an array
+            set -l arr (echo $output | tr "\t" "\n")
+            # Set the environment variable with the values from the array
+            set -gx cdk_$arr[1]_$arr[2] $arr[3]
+            echo "Set cdk_$arr[1]_$arr[2] to $arr[3]"
+        end
+    end
+
     complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
+
+    # Source .env file
+    posix-source $HOME/.env
 
     starship init fish | source
 end
