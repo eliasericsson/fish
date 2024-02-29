@@ -65,6 +65,10 @@ if status is-interactive
         zsh -c ". $HOME/k/k.sh; k $argv"
     end
 
+    function rusttool --description 'Choose between the installed rust toolchains'
+        rustup toolchain list | cut -d '-' -f 1 | fzf | xargs rustup default $1
+    end
+
     function outs --description 'Takes AWS CDK outputs and promotes them to environment variables'
         if test -e outputs.json
             # Get the outputs from the JSON file with JQ and store them in a variable
