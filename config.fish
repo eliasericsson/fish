@@ -11,6 +11,7 @@ if status is-interactive
     set EDITOR nvim
     set -g fish_greeting ""
     set DISPLAY $(echo $(grep nameserver /etc/resolv.conf | awk '{print $2}'):0)
+    set CONTAINER_HOST unix:///mnt/wsl/podman-sockets/podman-machine/podman-user.sock
 
     # Vim shorthands to avoid using plain Vim
     alias vim="nvim"
@@ -39,6 +40,9 @@ if status is-interactive
     alias tsr='terraform state rm'
     alias tss='terraform state show'
     alias ti='terraform import'
+
+    # Podman aliases
+    alias podman='sudo podman --remote --url $CONTAINER_HOST'
 
     # AWS PROFILE
     # alias awsp="/usr/local/bin/awsp && set -o allexport && source ~/.awsp && set +o allexport"
