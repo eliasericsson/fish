@@ -53,7 +53,7 @@ if status is-interactive
         end
     end
     function awsp
-        /usr/local/bin/awsp
+        ~/.local/bin/awsp
         posix-source ~/.awsp
     end
     
