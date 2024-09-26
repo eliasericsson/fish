@@ -1,6 +1,8 @@
+fish_config theme choose "Dracula"
 if status is-interactive
     # Commands to run in interactive sessions can go here
     fish_add_path $HOME/.local/bin
+    fish_add_path $HOME/.local/scripts
     fish_add_path $HOME/.bin
     fish_add_path $HOME/.cargo/bin
     fish_add_path /usr/local/go/bin
@@ -9,9 +11,12 @@ if status is-interactive
 
     set DOTNET_ROOT $HOME/dotnet
     set EDITOR nvim
+    set GIT_EDITOR nvim
     set -g fish_greeting ""
     set DISPLAY $(echo $(grep nameserver /etc/resolv.conf | awk '{print $2}'):0)
     set CONTAINER_HOST unix:///mnt/wsl/podman-sockets/podman-machine/podman-user.sock
+    set NVM_DIR $HOME/.nvm
+    set nvm_default_version "lts/*"
 
     # Vim shorthands to avoid using plain Vim
     alias vim="nvim"
@@ -36,13 +41,23 @@ if status is-interactive
     
     # Terraform aliases
     alias tsl='terraform state list'
-    alias terraform="$HOME/.bin/terraform"
+    # alias terraform="$HOME/.bin/terraform"
     alias tsr='terraform state rm'
     alias tss='terraform state show'
     alias ti='terraform import'
 
     # Podman aliases
     alias podman='sudo podman --remote --url $CONTAINER_HOST'
+
+    # Compress and extract
+    function compress
+        tar -czvf $argv $argv:r
+    end
+    alias untar='tar -xvf'
+    alias untargz='tar -xzvf'
+    alias untarbz2='tar -xjvf'
+    alias untarxz='tar -xJvf'
+
 
     # AWS PROFILE
     # alias awsp="/usr/local/bin/awsp && set -o allexport && source ~/.awsp && set +o allexport"
@@ -59,6 +74,7 @@ if status is-interactive
     
     # TMUX config
     alias ta="tmux attach"
+    bind \ef "tmux-sessionizer"
     
     # fdfind
     alias fd="fdfind"
