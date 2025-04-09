@@ -1,6 +1,7 @@
 fish_config theme choose "Dracula"
 if status is-interactive
     # Commands to run in interactive sessions can go here
+    eval "$(/opt/homebrew/bin/brew shellenv)"
     fish_add_path $HOME/.local/bin
     fish_add_path $HOME/.local/scripts
     fish_add_path $HOME/.bin
@@ -79,7 +80,7 @@ if status is-interactive
     # fdfind
     alias fd="fdfind"
 
-    alias ls="exa --icons --group-directories-first"
+    alias ls="lsd --icon auto --group-directories-first"
 
     function k --description 'List contents of directory, like ls but better'
         zsh -c ". $HOME/k/k.sh; k $argv"
@@ -107,10 +108,31 @@ if status is-interactive
         end
     end
 
+    function user_data_cmp --description 'Decode and compare user_data in neovim'
+        grep "user_data" /tmp/TERRAFORM_PLAN | tr -s ' ' | cut -d' ' -f5,7 | while read -l f1 f2
+            set f1 (string trim -c '"' $f1)
+            set f2 (string trim -c '"' $f2)
+            nvim -d (echo $f1 | base64 -d | psub) (echo $f2 | base64 -d | psub)
+        end
+    end
+
+    function ssm --description 'Start an AWS SSM session with the selected instance'
+        aws ec2 describe-instances \
+            --output json \
+            --filter 'Name=instance-state-name,Values=["pending","running","shutting-down","stopping","stopped"]' \
+            --query 'Reservations[].Instances[].{InstanceId: InstanceId, Name: Tags[?Key==`Name`].Value[], State: State.Name, LaunchTime: LaunchTime}' |
+            jq -r 'sort_by(.LaunchTime) | reverse | .[] | [.Name[], .InstanceId, .LaunchTime, .State] | @tsv' | 
+            column -t | 
+            fzf --bind 'enter:become(aws ssm start-session --target {2})+abort'
+    end
+
     complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)'
 
     # Source .env file
     posix-source $HOME/.env
 
+    alias assume="source (brew --prefix)/bin/assume.fish"
+
     starship init fish | source
+    eval (keychain --eval --agents ssh --inherit any playground)
 end
